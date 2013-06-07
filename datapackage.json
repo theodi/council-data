@@ -1,0 +1,65 @@
+{
+  "name":"Council data sections",
+  "description":"Research into how many councils have data sections, and how easy they are to access from the council's homepage",
+  "licenses": [
+    {
+    "id": "odbl",
+    "url": "http://opendatacommons.org/licenses/odbl/"
+    }
+  ],
+  "publishers": [
+    {
+      "name": "Open Data Institute",
+      "web": "http://www.theodi.org"
+    }
+  ],
+  "keywords":[
+    "Open Data",
+    "Councils",
+    "Local authorities"
+  ],
+  "resources": [
+    {
+      "path": "councils.csv",
+      "schema": {
+        "fields": [
+          {
+            "id": "name",
+            "type": "text",
+            "description": "Local authority name"
+          },
+          {
+            "id": "region",
+            "type": "text",
+            "description": "The geographical region the council is located in"
+          },
+          {
+            "id": "type",
+            "type": "text",
+            "description": "The council type (District, Metropolitan Borough etc)"
+          },
+          {
+            "id": "homepage",
+            "description": "The homepage of the local authority",
+            "type": "text"
+          },
+          {
+            "id": "data_url",
+            "description": "The URL of the data section (if any)",
+            "type": "text"
+          },
+          {
+            "id": "clicks",
+            "description": "How many clicks the page was found in",
+            "type": "text"
+          },
+          {
+            "id": "link_found",
+            "description": "On what page a link to the data section was found on (if any, or not the homepage)",
+            "type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

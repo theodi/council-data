@@ -4,6 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   	<title>Council Data Sections</title>
     <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Average+Sans' rel='stylesheet' type='text/css'>
     <style type="text/css">
     body {
@@ -32,6 +33,16 @@
       position: absolute;
       left: 580px;
       top: 380px;
+    }
+    
+    .percentage {
+      font-size: 60px;
+      font-weight: bold;
+      margin-top: 40px;
+    }
+    
+    .hidden {
+      display: none;
     }
     </style>
   </head>
@@ -75,9 +86,9 @@
             total++
           });
           
-          /*data.forEach(function(d) {
+          data.forEach(function(d) {
             d["percentage"] = Math.round((d["value"] / total) * 100)
-          })*/
+          })
                                   
           return data[r]
         }
@@ -113,9 +124,9 @@
             }
           });
                       
-          /*data.forEach(function(d) {
+          data.forEach(function(d) {
             d["percentage"] = Math.round((d["value"] / total) * 100)
-          })*/
+          })
           
           return data[r]
         }
@@ -133,7 +144,13 @@
         }
         
         function drawChart(data) {
-        
+          
+          total = 0
+          
+          data.forEach(function(x) {
+            total += x.value
+          })
+                  
           vis = svg.append("svg:g")
               .attr("transform", "translate(" + r + "," + r + ")") 
             
@@ -150,10 +167,18 @@
             .enter()                          
               .append("svg:g")                
               .attr("class", "slice")
+              .on("mouseenter", function(d) {
+                d3.select(this).select('.percentage').attr("class", "percentage")
+                d3.select(this).select('.label').attr("class", "label hidden")
+              })
+              .on("mouseout", function(d) {
+                d3.select(this).select('.percentage').attr("class", "percentage hidden")
+                d3.select(this).select('.label').attr("class", "label")
+              }); 
   
           arcs.append("svg:path")
             .attr("fill", function(d, i) { return color(i); } )
-            .attr("d", arc); 
+            .attr("d", arc);
 
           text = arcs.append("svg:text") 
             .attr("transform", function(d) {  
@@ -162,8 +187,21 @@
               return "translate(" + arc.centroid(d) + ")";  
             })
             .attr("text-anchor", "middle")
+            .attr("class", "label")
             .append("tspan")
               .text(function(d, i) { if (data[i]["value"] > 0) { return data[i].label } });
+          
+          percentage = arcs.append("svg:text") 
+            .attr("transform", function(d) {  
+              d.innerRadius = 0;
+              d.outerRadius = r;
+              return "translate(" + arc.centroid(d) + ")";  
+            })
+            .attr("text-anchor", "middle")
+            .attr("class", "percentage hidden")
+            .append("tspan")
+              .text(function(d, i) { return Math.round((data[i]["value"] / total) * 100) + "%" });
+          
         }
         
         function drawRegions() {

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  	<title>Council Data Sections</title>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Average+Sans' rel='stylesheet' type='text/css'>
+    <style type="text/css">
+    body {
+      font-family: 'Average Sans', sans-serif;
+      background-color: #eee;
+    }
+    
+    .slice {
+      cursor: pointer;
+      font-size: 20px;
+    }
+    
+    #regions {
+      position: absolute;
+      left: 580px;
+      top: 80px;
+    }
+    
+    #types {
+      position: absolute;
+      left: 580px;
+      top: 20px;
+    }
+    
+    #submit {
+      position: absolute;
+      left: 580px;
+      top: 380px;
+    }
+    </style>
+  </head>
+  <body>
+    
+    <script>     
+    
+      var w = 500,
+      h = 500,
+      r = 250,
+      color = d3.scale.ordinal()
+        .range(["#ffcb00", "#A8CB17", "#17649A", "#ff7900"]);
+        
+      var svg = d3.select("body")
+          .append("svg:svg")
+          .attr("width", w) 
+          .attr("height", h)
+      
+      d3.csv("councils.csv", function(error, d) { 
+      
+        function dataSections(r) {
+          var data = []        
+          data["all"] = [{"label": "No Data Sections", "value": 0}, {"label": "Data section discovered", "value": 0}]
+      
+          var regions = []
+              
+          var total = 0
+      
+          d.forEach(function(d) {
+            region = d.region.replace(/\s/g, '-').toLowerCase()
+            if (typeof data[region] == 'undefined') {
+              data[region] = [{"label": "No Data Sections", "value": 0}, {"label": "Data section discovered", "value": 0}]
+            }
+            if (d.data_url.length > 0) {
+              data[region][1]["value"]++
+              data["all"][1]["value"]++
+            } else {
+              data[region][0]["value"]++
+              data["all"][0]["value"]++
+            }
+            total++
+          });
+          
+          /*data.forEach(function(d) {
+            d["percentage"] = Math.round((d["value"] / total) * 100)
+          })*/
+                                  
+          return data[r]
+        }
+        
+        function clicks(r) {
+          var data = []        
+          data["all"] = [{"label": "One click", "value": 0}, {"label": "Two clicks", "value": 0}, {"label": "Three clicks", "value": 0}, {"label": "Not found", "value": 0}]
+      
+          var regions = []
+              
+          var total = 0
+      
+          d.forEach(function(d) {
+            region = d.region.replace(/\s/g, '-').toLowerCase()
+            if (typeof data[region] == 'undefined') {
+              data[region] = [{"label": "One click", "value": 0}, {"label": "Two clicks", "value": 0}, {"label": "Three clicks", "value": 0}, {"label": "Not found", "value": 0}]
+            }
+            if (d.data_url.length > 0) {
+              if (d.clicks == 1) {
+                data[region][0]["value"]++
+                data["all"][0]["value"]++
+              } else if (d.clicks == 2) {
+                data[region][1]["value"]++
+                data["all"][1]["value"]++
+              } else if (d.clicks == 3) {
+                data[region][2]["value"]++
+                data["all"][2]["value"]++
+              } else {
+                data[region][3]["value"]++
+                data["all"][3]["value"]++
+              }
+              total++
+            }
+          });
+                      
+          /*data.forEach(function(d) {
+            d["percentage"] = Math.round((d["value"] / total) * 100)
+          })*/
+          
+          return data[r]
+        }
+        
+        function getRegions() {
+          var data=d3.nest()
+            .key(function(d) {return d.region;})
+            .sortKeys(d3.ascending)
+            .entries(d);
+          all = Object
+          all.key = "All"
+          all.values = [data]
+          data.unshift(all)
+          return data;
+        }
+        
+        function drawChart(data) {
+        
+          vis = svg.append("svg:g")
+              .attr("transform", "translate(" + r + "," + r + ")") 
+            
+          vis = vis.data([data])              
+                        
+          arc = d3.svg.arc() 
+            .outerRadius(r);
+  
+          pie = d3.layout.pie()  
+            .value(function(d) { return d.value; });  
+      
+          arcs = vis.selectAll("g.slice") 
+            .data(pie)                        
+            .enter()                          
+              .append("svg:g")                
+              .attr("class", "slice")
+  
+          arcs.append("svg:path")
+            .attr("fill", function(d, i) { return color(i); } )
+            .attr("d", arc); 
+
+          text = arcs.append("svg:text") 
+            .attr("transform", function(d) {  
+              d.innerRadius = 0;
+              d.outerRadius = r;
+              return "translate(" + arc.centroid(d) + ")";  
+            })
+            .attr("text-anchor", "middle")
+            .append("tspan")
+              .text(function(d, i) { if (data[i]["value"] > 0) { return data[i].label } });
+        }
+        
+        function drawRegions() {
+          regions = getRegions();
+          
+          body = d3.select("body")
+                    
+          divs = body.append("div").attr("id", "regions")
+            .selectAll("div").data(regions).enter()
+            .append("div")
+          
+          labels = divs.append("label")
+            
+          labels.append("input")
+            .attr("type", "radio")
+            .attr("name", "regions")
+            .attr("checked", function(d) { if (d.key == "All") { return "checked"; } })
+            .attr("value", function(d) { return d.key.replace(/\s/g, '-').toLowerCase() })
+          
+          labels.append("span")
+            .text(function(d) { return d.key })
+        }
+        
+        function drawTypes() {        
+          body = d3.select("body")
+          
+          divs = body.append("div").attr("id", "types")
+            .selectAll("div").data(["Data section discovered", "Number of clicks"]).enter()
+            .append("div")
+          
+          labels = divs.append("label")
+          
+          labels.append("input")
+            .attr("type", "radio")
+            .attr("name", "types")
+            .attr("checked", function(d) { if (d == "Data section discovered") { return "checked"; } })
+            .attr("value", function(d) { return d })
+          
+          labels.append("span")
+            .text(function(d) { return d })
+            
+          body.append("input")
+            .attr("type", "submit")
+            .attr("id", "submit")
+            .on("click", function() {
+              for (var i = 0; i < document.getElementsByName("types").length; i++) {
+                if (document.getElementsByName("types")[i].checked) {
+                  type = document.getElementsByName("types")[i].value
+                }
+              }
+              for (var i = 0; i < document.getElementsByName("regions").length; i++) {
+                if (document.getElementsByName("regions")[i].checked) {
+                  region = document.getElementsByName("regions")[i].value
+                }
+              }
+              
+              
+              if (type == "Data section discovered") {
+                data = dataSections(region);
+              } else {
+                data = clicks(region);
+              }
+              
+              drawChart(data);
+            })
+  
+        }
+        
+        data = dataSections("all");
+        drawChart(data);  
+        drawTypes(); 
+        drawRegions(); 
+      });
+
+    </script>
+  </body>
+</html>

@@ -223,11 +223,7 @@
           
           labels.append("span")
             .text(function(d) { return d.key })
-        }
-        
-        function drawTypes() {        
-          body = d3.select("body")
-          
+                  
           divs = body.append("div").attr("id", "types")
             .selectAll("div").data(["Data section discovered", "Number of clicks"]).enter()
             .append("div")

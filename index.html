@@ -54,7 +54,7 @@
       h = 500,
       r = 250,
       color = d3.scale.ordinal()
-        .range(["#ffcb00", "#A8CB17", "#17649A", "#ff7900"]);
+        .range(["#d7191c","#fdae61","#abdda4","#2b83ba"])
         
       var svg = d3.select("body")
           .append("svg:svg")
@@ -204,7 +204,7 @@
           
         }
         
-        function drawRegions() {
+        function drawForm() {
           regions = getRegions();
           
           body = d3.select("body")
@@ -268,8 +268,7 @@
         
         data = dataSections("all");
         drawChart(data);  
-        drawTypes(); 
-        drawRegions(); 
+        drawForm(); 
       });
 
     </script>
